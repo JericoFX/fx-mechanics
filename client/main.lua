@@ -72,6 +72,7 @@ end
 
 
 RegisterCommand("goUp", function(_, __)
+	if not playerJob then playerJob = QBCore.Functions.GetPlayerData().job end
 	if not playerJob.name == "mechanic" then return end
 	lib.requestModel(Config.ItemsToUse.props.jack)
 	lib.requestAnimDict("random@hitch_lift")

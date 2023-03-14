@@ -78,14 +78,16 @@ end
 
 ---Return vehicle basic damage
 ---@param entity string | number
+
 function GetVehicleDamages(entity)
     CreateThread(function()
-        local window, wheels = {}, {}
+        local windows, wheels = {}, {}
+
         for i = 0, 7 do
-            if not IsVehicleWindowIntact(entity --[[@as number]], i) then
-                window[i] = true
-            end
+            local damaged = IsVehicleWindowIntact(entity --[[@as number]], i) -- False means the vehicle has the window i broken.
+            windows[i] = damaged
         end
+
         for i = 0, GetVehicleNumberOfWheels(entity --[[@as number]]) - 1 do
             local burst, notBurst = IsVehicleTyreBurst(entity --[[@as number]], i, true),
                 IsVehicleTyreBurst(entity --[[@as number]], i, false)
@@ -93,12 +95,14 @@ function GetVehicleDamages(entity)
                 wheels[i] = burst and burst or notBurst
             end
         end
-        log(wheels)
+
         return {
             oil = GetVehicleOilLevel(entity --[[@as number]]),
             petrol = GetVehiclePetrolTankHealth(entity --[[@as number]]),
             fuel = GetVehicleFuelLevel(entity --[[@as number]]),
             body = GetVehicleBodyHealth(entity --[[@as number]]),
+            wheels = wheels,
+            windows = windows
         }
     end)
 end
