@@ -1,0 +1,4 @@
+{
+  "Lua.diagnostics.globals": ["lib"],
+  "Lua.diagnostics.disable": ["unused-local"]
+}
