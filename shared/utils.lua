@@ -78,7 +78,7 @@ end
 
 ---Return vehicle basic damage
 ---@param entity string | number
-
+---@return {oil: number,petrol:number,fuel:number,body:number,wheels:table,windows:table}
 function GetVehicleDamages(entity)
     CreateThread(function()
         local windows, wheels = {}, {}
