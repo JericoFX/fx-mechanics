@@ -1,4 +1,5 @@
 {
   "Lua.diagnostics.globals": ["lib"],
-  "Lua.diagnostics.disable": ["unused-local"]
+  "Lua.diagnostics.disable": ["unused-local"],
+  "cmake.configureOnOpen": false
 }

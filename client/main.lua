@@ -2,13 +2,13 @@ local QBCore = exports["qb-core"]:GetCoreObject()
 local playerJob, currentVehicle, zones, currentZone,jackItem = nil, nil, {}, nil,nil
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function(player)
-	-- local job in player
-	-- playerJob = job
+	 local job in player
+	playerJob = job
 end)
 
 RegisterNetEvent('QBCore:Player:SetPlayerData', function(player)
-	--  local job in player
-	-- playerJob = job
+	 local job in player
+	 playerJob = job
 end)
 local function onEnter(self)
 	currentZone = self.data.name
@@ -47,19 +47,59 @@ CreateThread(function()
 	end
 end)
 
+local function GetVehicleStateMenu(entity)
+	if not entity then return end
+	-- lib.registerMenu({
+	-- 	id="vehicle_menu_information",
+	-- 	title="Mechanic Menu",
+	-- 	options={
+	-- 		{label = "Health Menu",description="Check the health of the vehicle"}
+	-- 	}
+	-- })
+	local engine,fuel,petrol,oil = GetVehicleEngineHealth()
+	lib.registerContext({
+		id = ("vehicle_menu_%s"):format(entity),
+		title = 'Vehicle Menu',
+		options = {
+			{
+				title = "Engine Health",
+				progress = GetVehicleEngineHealth(entity) / 10,
+
+			}
+		}
+	})
+end
+
 
 RegisterCommand("goUp", function(_, __)
+	if not playerJob.name == "mechanic" then return end
 	lib.requestModel(Config.ItemsToUse.props.jack)
 	lib.requestAnimDict("random@hitch_lift")
 	local veh, closeDist = QBCore.Functions.GetClosestVehicle()
-	local coords = GetEntityCoords(veh)
-	jackItem = CreateObject(joaat(Config.ItemsToUse.props.jack),coords.x,coords.y,coords.z - 0.95,false,true,false)
-	QBCore.Functions.PlayAnim(Config.Anims.carJack.anim_dict, Config.Anims.carJack.anim_lib, false, -1)
-	SetEntityCollision(jackItem, false, false)
-	SetBagValue(veh, "jackUP", true, true)
-	SetTimeout(20000,function()
-		SetBagValue(veh,"jackUP",false,true)
-	end)
+	GetVehicleDamages(veh)
+	-- local coords = GetEntityCoords(veh)
+	-- jackItem = CreateObject(joaat(Config.ItemsToUse.props.jack),coords.x,coords.y,coords.z - 0.95,false,true,false)
+	-- QBCore.Functions.PlayAnim(Config.Anims.carJack.anim_dict, Config.Anims.carJack.anim_lib, false, -1)
+	-- SetEntityCollision(jackItem, false, false)
+	-- if lib.progressBar({
+	-- 	duration = 3000,
+	-- 	label = "Colocando Gato",
+	-- 	useWhileDead = false,
+	-- 	canCancel = true,
+	-- 	disable = {
+	-- 		car = true,
+	-- 		move = true,
+	-- 		mouse = true
+	-- 	}
+	-- }) then
+	-- 	SetBagValue(veh, "jackUP", true, true)
+	-- else
+	-- 	ClearPedTasks(cache.ped)
+	-- end
+
+	-- SetTimeout(20000,function()
+	-- 	SetBagValue(veh,"jackUP",false,true)
+	-- end)
 end, false)
 
 HandleStateBag("jackUP", function(entity, value)
@@ -67,6 +107,7 @@ HandleStateBag("jackUP", function(entity, value)
 	if not entity or entity == 0 then return end
 	local coords = GetEntityCoords(entity)
 	if value then
+	
 		repeat
 			Wait(1000)
 			 count -= 1
@@ -75,7 +116,7 @@ HandleStateBag("jackUP", function(entity, value)
 			 FreezeEntityPosition(entity, true)
 		until count == 0
 		SetBagValue(entity,"isJacked",true,true)
-		ClearPedTasks(cache.ped)
+		
 	elseif value == false then
 		repeat
 			Wait(1000)
