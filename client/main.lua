@@ -1,14 +1,22 @@
 local QBCore = exports["qb-core"]:GetCoreObject()
 local playerJob, currentVehicle, zones, currentZone,jackItem = nil, nil, {}, nil,nil
+local SetTimeout = Citizen.SetTimeout
+local CreateThreadNow = Citizen.CreateThreadNow
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function(player)
-	 local job in player
-	playerJob = job
+	SetTimeout(300,function()
+		local job in player
+		playerJob = job
+	end)
+
+
 end)
 
 RegisterNetEvent('QBCore:Player:SetPlayerData', function(player)
-	 local job in player
-	 playerJob = job
+	SetTimeout(300,function()
+		local job in player
+		playerJob = job
+	end)
 end)
 local function onEnter(self)
 	currentZone = self.data.name
@@ -77,11 +85,35 @@ RegisterCommand("goUp", function(_, __)
 	lib.requestModel(Config.ItemsToUse.props.jack)
 	lib.requestAnimDict("random@hitch_lift")
 	local veh, closeDist = QBCore.Functions.GetClosestVehicle()
-	GetVehicleDamages(veh)
-	-- local coords = GetEntityCoords(veh)
-	-- jackItem = CreateObject(joaat(Config.ItemsToUse.props.jack),coords.x,coords.y,coords.z - 0.95,false,true,false)
-	-- QBCore.Functions.PlayAnim(Config.Anims.carJack.anim_dict, Config.Anims.carJack.anim_lib, false, -1)
-	-- SetEntityCollision(jackItem, false, false)
+	local oil,petrol,fuel,body,wheels,windows in GetVehicleDamages(veh)
+	SetBagValue(veh,"Damage",GetVehicleDamages(veh),true) -- let ensure that the damage is shared between everyone
+	lib.registerContext({
+		id=("vehicle_damage_menu_%s"):format(veh),
+		title ="Vehicle Damage Menu",
+		options = {
+			{
+				title = ("Oil Level: %s"):format(oil),
+				progress = oil,
+				colorScheme = (oil ) > 30 and "lime" or "orange"
+			},
+			{
+				title ="Petrol Tank Health",
+				progress = petrol / 10,
+				colorScheme = (petrol / 10) > 30 and "lime" or "orange"
+			},
+			{
+				title ="Fuel Level",
+				progress = fuel,
+				colorScheme = (fuel / 10) > 30 and "lime" or "orange"
+			}
+		}
+	})
+
+	lib.showContext(("vehicle_damage_menu_%s"):format(veh))
+ local coords = GetEntityCoords(veh)
+jackItem = CreateObject(joaat(Config.ItemsToUse.props.jack),coords.x,coords.y,coords.z - 0.95,false,true,false)
+ QBCore.Functions.PlayAnim(Config.Anims.carJack.anim_dict, Config.Anims.carJack.anim_lib, false, -1)
+ SetEntityCollision(jackItem, false, false)
 	-- if lib.progressBar({
 	-- 	duration = 3000,
 	-- 	label = "Colocando Gato",
@@ -93,22 +125,22 @@ RegisterCommand("goUp", function(_, __)
 	-- 		mouse = true
 	-- 	}
 	-- }) then
-	-- 	SetBagValue(veh, "jackUP", true, true)
+	SetBagValue(veh, "jackUP", "up", true)
 	-- else
 	-- 	ClearPedTasks(cache.ped)
 	-- end
 
-	-- SetTimeout(20000,function()
-	-- 	SetBagValue(veh,"jackUP",false,true)
-	-- end)
+ SetTimeout(20000,function()
+ 	SetBagValue(veh,"jackUP","down",true)
+	 end)
 end, false)
 
 HandleStateBag("jackUP", function(entity, value)
 	local count = 15
 	if not entity or entity == 0 then return end
 	local coords = GetEntityCoords(entity)
-	if value then
-	
+	print(value)
+	if value == "up" then
 		repeat
 			Wait(1000)
 			 count -= 1
@@ -117,8 +149,7 @@ HandleStateBag("jackUP", function(entity, value)
 			 FreezeEntityPosition(entity, true)
 		until count == 0
 		SetBagValue(entity,"isJacked",true,true)
-		
-	elseif value == false then
+	elseif value == "down" then
 		repeat
 			Wait(1000)
 			DurationLerp(jackItem,100,"down")
@@ -134,8 +165,36 @@ HandleStateBag("jackUP", function(entity, value)
 		print "no specific value "
 		return
 	end
+end,false)
+
+HandleStateBag("Damage",function(entity,value)
+	if  table.type(value)  == 'empty' then return end
+				local _values = value
+				SetVehicleOilLevel(entity,_values.oil + 0.5)
+				SetVehicleEngineHealth(entity,_values.engine + 0.5)
+				SetVehiclePetrolTankHealth(entity,_values.petrol + 0.5)
+				if Config.FuelResource then
+					exports[Config.FuelResource.use]:SetFuel(entity,_values.fuel)
+				end
+				SetVehicleFuelLevel(entity,_values.fuel)
+
+
 end)
 
+-- AddStateBagChangeHandler("Damage", nil, function(bagNameEvent, _, value, _unused, _replicated)
+-- 	local entity = GetEntityFromStateBagName(bagNameEvent)
+-- 	if entity == 0 then return end
+-- 	local network = NetToVeh(VehToNet(entity))
+-- 	if  table.type(value)  == 'empty' then return end
+-- 			local _values = value
+-- 			SetVehicleOilLevel(network,_values.oil + 0.5)
+-- 			SetVehicleEngineHealth(network,_values.engine + 0.5)
+-- 			SetVehiclePetrolTankHealth(network,_values.petrol + 0.5)
+-- 			if Config.FuelResource then
+-- 				exports[Config.FuelResource.use]:SetFuel(network,_values.fuel)
+-- 			end
+-- 			SetVehicleFuelLevel(network,_values.fuel)
+-- end)
 function lerp(a, b, t)
   return a + (b - a) * t
 end

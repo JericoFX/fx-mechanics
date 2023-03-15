@@ -1,5 +1,9 @@
 {
-  "Lua.diagnostics.globals": ["lib"],
-  "Lua.diagnostics.disable": ["unused-local", "missing-return"],
+  "Lua.diagnostics.globals": ["lib", "cache"],
+  "Lua.diagnostics.disable": [
+    "unused-local",
+    "missing-return",
+    "redundant-parameter"
+  ],
   "cmake.configureOnOpen": false
 }

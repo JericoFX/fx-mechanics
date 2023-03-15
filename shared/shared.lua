@@ -23,6 +23,10 @@ Config.Places = {
     }
 }
 
+Config.FuelResource = {
+    use = "LegacyFuel" -- if you want to use the natives put this on false
+}
+
 Config.Anims = {
     carJack = {
         anim_dict = "anim@amb@business@weed@weed_inspecting_lo_med_hi@",
